@@ -3,11 +3,15 @@ DBPASS=$2
 FUNC=$3
 
 function list-dbs {
-	echo "Connecting with: ${DBUSER}:${DBPASS}"
+	echo "show databases;" | mysql -u"${DBUSER}" -p"${DBPASS}" --skip-column-names 2> /dev/null | grep -v "information_schema" | grep -v "performance_schema" | grep -v "mysql"
 }
 function list-tables {
-	echo "Listing ${1}, with ${DBUSER}:${DBPASS}"
+	find /var/lib/mysql/${1}/ -name '*.ibd' | cut -d'/' -f2 | cut -d'.' -f1
 }
+function list-updated-tables {
+	find /var/lib/mysql/${1}/ -name '*.ibd' -newer ${2} | cut -d'/' -f2 | cut -d'.' -f1
+}
+
 if [ "$FUNC" == "list-dbs" ]; then
 	list-dbs
 elif [ "$FUNC" == "list-tables" ]; then
